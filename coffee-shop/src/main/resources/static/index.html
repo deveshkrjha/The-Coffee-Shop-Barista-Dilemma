@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>☕ Bean & Brew Coffee Shop</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f6f2ee;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #5b3c11;
+        }
+
+        .box {
+            background: white;
+            padding: 20px;
+            margin: 20px auto;
+            width: 350px;
+            border-radius: 10px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.1);
+        }
+
+        select, button {
+            padding: 10px;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        button {
+            background-color: #5b3c11;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #7a4f1c;
+        }
+
+        .time {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        pre {
+            text-align: left;
+            background: #eee;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>☕ Bean & Brew Coffee Shop</h1>
+
+<div class="box">
+    <h3>Place Order</h3>
+
+    <select id="drink" onchange="updateTime()">
+        <option value="Cold Brew">Cold Brew</option>
+        <option value="Espresso">Espresso</option>
+        <option value="Americano">Americano</option>
+        <option value="Cappuccino">Cappuccino</option>
+        <option value="Latte">Latte</option>
+        <option value="Mocha">Mocha</option>
+    </select>
+
+    <div class="time" id="prepTime">
+        ⏱ Preparation Time: 1 minute
+    </div>
+
+    <br>
+
+    <label>
+        <input type="checkbox" id="regular">
+        Regular Customer
+    </label>
+
+    <br><br>
+
+    <button onclick="placeOrder()">Place Order</button>
+</div>
+
+<div class="box">
+    <h3>📊 Live Coffee Shop Stats</h3>
+    <button onclick="loadStats()">Refresh Stats</button>
+    <pre id="stats">Click "Refresh Stats"</pre>
+</div>
+
+<script>
+    // Drink → preparation time map
+    const prepTimes = {
+        "Cold Brew": 1,
+        "Espresso": 2,
+        "Americano": 2,
+        "Cappuccino": 4,
+        "Latte": 4,
+        "Mocha": 6
+    };
+
+    function updateTime() {
+        const drink = document.getElementById("drink").value;
+        const time = prepTimes[drink];
+        document.getElementById("prepTime").innerText =
+            "⏱ Preparation Time: " + time + " minute(s)";
+    }
+
+    function placeOrder() {
+        const drink = document.getElementById("drink").value;
+        const regular = document.getElementById("regular").checked;
+
+        fetch("/orders", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                drinkType: drink,
+                regularCustomer: regular
+            })
+        })
+        .then(res => res.text())
+        .then(msg => alert(msg));
+    }
+
+    function loadStats() {
+        fetch("/stats")
+            .then(res => res.text())
+            .then(data => {
+                document.getElementById("stats").innerText = data;
+            });
+    }
+
+    // Default time on load
+    updateTime();
+</script>
+
+</body>
+</html>
